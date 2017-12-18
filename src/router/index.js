@@ -16,12 +16,18 @@ export default new Router({
     {
       path: '/todo',
       name: 'Todo',
-      component: todo
+      component: todo,
+      meta: { mustAuth: true }
     },
     {
       path: '/wallet',
       name: 'wallet',
       component: wallet
+    },
+    {
+      path: '*',
+      name: 'Redirect',
+      redirect: '/'
     }
   ]
 })

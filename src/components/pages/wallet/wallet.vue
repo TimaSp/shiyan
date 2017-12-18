@@ -1,41 +1,57 @@
 <template>
 <div>
+	<button @click="logOut">LOG OUT</button>
 <div class="wrapper">
     <div class="app-wrapper">
       <aside class="wallet">
         <h2>My Wallets</h2>
-        <div class="modal-control">+</div>
-        <div class="cards" v-for="(card, key) in cards" :key="key">
-          <div class="credit-card" @click="selectCard(card)">
-            {{card.type}}
-            <div class='credit-card_number'>
-              {{card.number}}
+        <div class="modal-control" @click="showModal = true">+</div>
+        <div class="cards">
+          <div class="credit-card" @click="selectAccount(account)" v-for="(account, key) in accounts" :key="key">
+            <div class="credit-card__name">
+							{{account.accName}}
+						</div>
+            <div v-if="account.currency === 'USD'" class='credit-card__usd'>
+              {{account.accBalance}}
             </div>
-            <div class='credit-card_expiration'>Valid Thru:
-              {{card.expiration}}
+						<div v-if="account.currency === 'CNY'" class='credit-card__cny'>
+              {{account.accBalance}}
             </div>
+						<div class="credit-card__number" v-if="account.cardNumber">
+							{{account.cardNumber}}
+						</div>
           </div>
         </div>
       </aside>
 
       <div class="transactions-wrapper">
-        <h2>
-          Current Balance
-          <span class="total-balance"></span>
-        </h2>
         <div class="transactions">
+					<h2 class="active-header">
+						{{ activeAccount.accName }}
+						<span class="total-balance">
+							{{ activeAccount.accBalance }}
+						</span>
+						<span class="add-transaction" @click="addTransaction(activeAccount)">+</span>
+					</h2>
             <div
               class="transaction-item"
-              v-if="activeTransactions.length > 0"
-              v-for="(transaction, key) in activeTransactions"
+              v-for="(transaction, key) in activeAccount.transactions"
               :key="key"
             >
               <div class='transaction-item_details'>
-                <h3>{{transaction.name}}</h3>
-                <span class='details'>{{transaction.category}} {{ transaction.ID}} {{transaction.date}}</span>
+                <h3 class="transaction-name">{{transaction.name}}</h3>
+								<p class="description">
+									{{transaction.description}}
+								</p>
+                <span class='details'>{{transaction.date | day}} {{transaction.date | month}}</span>
               </div>
               <div class='transaction-item_amount'>
-                <span>$</span>
+                <span v-if="transaction.currency === 'USD'">
+									$
+								</span>
+								<span v-if="transaction.currency === 'CNY'">
+									元
+								</span>
                 <p class='amount'>
                   {{transaction.amount}}</p>
               </div>
@@ -46,104 +62,202 @@
 
     </div>
 
-  <div class="modal">
-    <div class="modal-body">
-      <h3>Add New Card</h3>
-      <div class="modal-close">+</div>
-      <div class="card-list">
-        <div class="card-image visa"></div>
-        <div class="card-image amex"></div>
-        <div class="card-image mc"></div>
-      </div>
-    </div>
-  </div>
+  <modal v-if="showModal" :toggleModal="toggleModal" :user="userInfo"/>
+  <modal-transaction v-if="showModalTransaction" :toggleModal="toggleModal2" :account="activeAccount"/>
   </div>
 </template>
 
 <script>
+import moment from 'moment'
+import Modal from '../../shared/Modal/Modal.vue'
+import ModalTransaction from '../../shared/ModalTransaction/ModalTransaction.vue'
+
 export default {
   data() {
-    return{
-        msg: false,
-        activeTransactions: [],
-        cards: [
-          {
-            type: "visa",
-            number: "**** **** **** 2562",
-            expiration: "12/17",
-            transactions: [
-              {
-                name: "Apple iPhone 6, 6g GB",
-                type: "debit",
-                category: "Electronics",
-                ID: "#343223",
-                date: "12 July, 2016",
-                amount: "+650.00"
-              },
-              {
-                name: "Funds Added",
-                type: "credit",
-                category: "Payment",
-                ID: "#343212",
-                date: "11 July, 2016",
-                amount: "-900.00"
-              },
-              {
-                name: "Energy Bill",
-                type: "debit",
-                category: "",
-                ID: "#343566",
-                date: "11 July, 2016",
-                amount: "+84.96"
-              },
-              {
-                name: "Mega Image SRL",
-                type: "debit",
-                category: "Food&Health",
-                ID: "#343565",
-                date: "11 July, 2016",
-                amount: "+112.75"
-              },
-                {
-                name: "ATM DV24",
-                type: "debit",
-                category: "",
-                ID: "#343253",
-                date: "09 July, 2016",
-                amount: "+200.00"
-              },
-              {
-                name: "Lukoil Station",
-                type: "debit",
-                category: "Gas",
-                ID: "#343279",
-                date: "09 July, 2016",
-                amount: "+190.48"
-              },
-              {
-                name: "Funds Added",
-                type: "credit",
-                category: "Payment",
-                ID: "#343212",
-                date: "11 July, 2016",
-                amount: "+390.81"
-              }
-            ]
-          }
-        ]
+    return {
+			msg: false,
+			showModal: false,
+			showModalTransaction: false,
+			userInfo: {
+				name: "RT"
+			},
+			accounts: [],
+			activeAccount: {},
+			cards: [
+				{
+					type: "visa",
+					number: "**** **** **** 2562",
+					expiration: "12/17",
+					transactions: [
+						{
+							name: "Apple iPhone 6, 6g GB",
+							type: "debit",
+							category: "Electronics",
+							ID: "#343223",
+							date: "12 July, 2016",
+							amount: "+650.00"
+						},
+						{
+							name: "Funds Added",
+							type: "credit",
+							category: "Payment",
+							ID: "#343212",
+							date: "11 July, 2016",
+							amount: "-900.00"
+						},
+						{
+							name: "Energy Bill",
+							type: "debit",
+							category: "",
+							ID: "#343566",
+							date: "11 July, 2016",
+							amount: "+84.96"
+						},
+						{
+							name: "Mega Image SRL",
+							type: "debit",
+							category: "Food&Health",
+							ID: "#343565",
+							date: "11 July, 2016",
+							amount: "+112.75"
+						},
+							{
+							name: "ATM DV24",
+							type: "debit",
+							category: "",
+							ID: "#343253",
+							date: "09 July, 2016",
+							amount: "+200.00"
+						},
+						{
+							name: "Lukoil Station",
+							type: "debit",
+							category: "Gas",
+							ID: "#343279",
+							date: "09 July, 2016",
+							amount: "+190.48"
+						},
+						{
+							name: "Funds Added",
+							type: "credit",
+							category: "Payment",
+							ID: "#343212",
+							date: "11 July, 2016",
+							amount: "+390.81"
+						}
+					]
+				}
+			]
     }
-  },
+	},
+	components: {
+		Modal,
+		ModalTransaction
+	},
+	filters: {
+		month(date) {
+			return moment(date).format('MMM');
+		},
+		day(date) {
+			return moment(date).format('D');
+		}
+	},
+	watch: {
+		accounts() {
+			console.log('!')
+		}
+	},
+	computed: {
+		getUserInfo() {
+			if (!localStorage.userUid) this.$router.push({ path: '/'})
+			else {
+				const uid = localStorage.userUid
+				const userRef = wilddog.sync().ref().child('users').child(uid)
+				userRef.once('value').then(response => {
+					let data = response.val()
+					this.userInfo = data
+				})
+			}
+		},
+		getAccounts() {
+			const uid = localStorage.userUid
+			const walletRef = wilddog.sync().ref().child('users').child(uid).child('wallets')
+			walletRef.once('value').then(response => {
+					let data = response.val()
+				this.accounts = data
+			})
+		}
+	},
   methods: {
-    selectCard(_card) {
-      console.log(_card);
-      this.activeTransactions = _card.transactions
-    }
-  }
+    selectAccount(_acc) {
+      console.log(_acc);
+      this.activeAccount = _acc
+		},
+		logOut() {
+			wilddog.auth().signOut(() => {
+				localStorage.removeItem('userUid')
+				this.$router.push({ path: '/'})
+			})
+		},
+		toggleModal() {
+			const uid = localStorage.userUid
+			const walletRef = wilddog.sync().ref().child('users').child(uid).child('wallets')
+			walletRef.once('value').then(response => {
+					let data = response.val()
+				this.accounts = data
+			})
+			this.activeAccount = {}
+			this.showModal = !this.showModal
+			
+		},
+		toggleModal2() {
+			const uid = localStorage.userUid
+			const walletRef = wilddog.sync().ref().child('users').child(uid).child('wallets')
+			walletRef.once('value').then(response => {
+					let data = response.val()
+				this.accounts = data
+			})
+			this.activeAccount = {}
+			this.showModalTransaction = !this.showModalTransaction
+		},
+		addTransaction(_acc) {
+			console.log(_acc)
+			this.showModalTransaction = true
+		}
+	},
+	mounted() {
+		this.getAccounts
+	}
 }
 </script>
 
 <style lang="css">
-
+.active-header {
+	border-bottom: 1px solid #e5e5e5;
+	height: 50px;
+	line-height: 50px;
+	position: relative;
+	margin-bottom: 20px;
+}
+.add-transaction {
+	display: inline-block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	color: #c6cce2;
+	font-size: 45px;
+	line-height: 22px;
+	cursor: pointer;
+	-webkit-transition: color .1s;
+	transition: color .1s;
+}
+.description {
+	text-align: left;
+	color: #818181;
+}
+.transaction-name {
+	text-align: left;
+}
 h2 {
 	margin: 0px;
 	font-weight: 400;
@@ -191,7 +305,7 @@ h3 {
 
 .transactions-wrapper {
 	width: 520px;
-	padding: 50px;
+	padding: 50px 50px 20px 50px;
 }
 
 .total-balance {
@@ -206,10 +320,7 @@ h3 {
 }
 
 .transactions {
-	margin-top: 60px;
-	border-top: 1px solid #e5e5e5;
-	padding-top: 50px;
-	height: 550px;
+	height: 100%;
 	overflow: scroll;
 }
 
@@ -222,7 +333,7 @@ h3 {
 }
 
 .transaction-item {
-	margin-bottom: 45px;
+	margin-bottom: 15px;
 }
 
 .transaction-item {
@@ -234,6 +345,9 @@ h3 {
 	font-size: 14px;
 	line-height: 14px;
 	color: #999;
+	position: absolute;
+	top: -5px;
+	right: 0;
 }
 
 .transaction-item_details {
@@ -271,13 +385,52 @@ h3 {
 
 .credit-card {
 	  padding: 15px;
+		position: relative;
     background-color: #fff;
-    margin-bottom: 45px;
+    margin-bottom: 25px;
 		border-radius: 3px;
     border: 2px solid #e1e1e1;
 		font-family: 'Roboto', sans-serif;
 		cursor: pointer;
 		transition: .1s ease-in-out;
+}
+.credit-card__name {
+	color: green;
+}
+.credit-card__usd {
+	font-weight: 600;
+	font-size: 12px;
+	color: #444750;
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: 1px solid #ddd;
+	border-right: 0;
+	border-top: 0;
+	padding: 5px;
+}
+.credit-card__usd::after {
+	content: '$';
+	font-size: 10px;
+}
+.credit-card__cny {
+	font-weight: 600;
+	font-size: 12px;
+	color: #444750;
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: 1px solid #ddd;
+	border-right: 0;
+	border-top: 0;
+	padding: 5px;
+}
+.credit-card__cny::after {
+	content: '元';
+	font-size: 10px;
+}
+.credit-card__balance {
+	color: purple;
 }
 .credit-card:hover {
 	transform: scale(1.07);
@@ -302,7 +455,7 @@ h3 {
 	color: #b3b3b3;
 }
 
-.credit-card_number {
+.credit-card__number {
 	color: #666666;
 }
 

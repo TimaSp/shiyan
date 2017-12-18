@@ -7,8 +7,8 @@
           <div class="login">
             <Form ref="formInline">
               <FormItem prop="user">
-                  <Input type="text" v-model="login.email" placeholder="Username">
-                      <Icon type="ios-person-outline" slot="prepend"></Icon>
+                  <Input type="text" v-model="login.email" placeholder="Email">
+                      <Icon type="ios-email" slot="prepend"></Icon>
                   </Input>
               </FormItem>
               <FormItem prop="password">
@@ -26,12 +26,12 @@
           <div class="login">
             <Form ref="formInline">
               <FormItem prop="user">
-                  <Input type="text" v-model="registrate.email" placeholder="Username">
-                      <Icon type="ios-person-outline" slot="prepend"></Icon>
+                  <Input type="text" v-model="registrate.email" placeholder="Email">
+                      <Icon type="ios-email" slot="prepend"></Icon>
                   </Input>
               </FormItem>
               <FormItem prop="user">
-                  <Input type="text" v-model="registrate.login" placeholder="login">
+                  <Input type="text" v-model="registrate.displayName" placeholder="Name">
                       <Icon type="ios-person-outline" slot="prepend"></Icon>
                   </Input>
               </FormItem>
@@ -63,7 +63,7 @@ export default {
         password: ''
       },
       registrate: {
-        login: '',
+        displayName: '',
         email: '',
         password: ''
       }
@@ -76,11 +76,9 @@ export default {
     SingIn(email, password) {
       wilddog.auth().signInWithEmailAndPassword(email, password)
       .then((res) => {
-          console.log(res);
-          console.log('ZAWEL')
-          this.$router.push({ path: '/todo'})
+          localStorage.userUid = res.uid
+          this.$router.push({ path: '/wallet'})
       }).catch((error) => {
-          // 错误处理
           console.log(error)
           console.log('Owibka')
       });
@@ -90,10 +88,13 @@ export default {
       .then((user) => {
         const ref = wilddog.sync().ref('users').child(user.uid)
         .set({
-          ...user
+          email: email,
+          displayName: this.registrate.displayName,
+          uid: user.uid
         })
         .then(() => {
           console.log('User updated')
+          this.$router.push({ path: '/wallet'})
         })
         .catch((error) => {
           console.warn('User not in database')
