@@ -1,8 +1,8 @@
 <template>
-  <div class="hello">
-    <Row>
-      <Col span="24">
-      <Tabs value="name1">
+    <Row class="loginBlock">
+      <Col span="24" class="loginCol">
+      <div class="auth">
+        <Tabs value="name1">
         <TabPane label="Sign in" name="name1">
           <div class="login">
             <Form ref="formInline">
@@ -17,7 +17,7 @@
                   </Input>
               </FormItem>
               <FormItem>
-                  <Button type="primary" @click="SingIn(login.email, login.password)">Sign in</Button>
+                  <Button type="warning" @click="SingIn(login.email, login.password)">Sign in</Button>
               </FormItem>
             </Form>
           </div>
@@ -41,16 +41,15 @@
                   </Input>
               </FormItem>
               <FormItem>
-                  <Button type="primary" @click="SignUp(registrate.email, registrate.password)">Sign up</Button>                
+                  <Button type="warning" @click="SignUp(registrate.email, registrate.password)">Sign up</Button>                
               </FormItem>
             </Form>
           </div>
         </TabPane>
       </Tabs>
-        
+      </div> 
       </Col>
     </Row>
-  </div>
 </template>
 
 <script>
@@ -113,8 +112,20 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-html {
+.auth {
+  background:#f1f1f1;
+  border-radius: 10px;
+  -webkit-box-shadow: 0px 8px 24px 4px rgba(255,173,40,1);
+  box-shadow: 0px 8px 24px 4px rgba(255,173,40,1);
+}
+.loginCol {
+  display: flex;
+  justify-content: center;
+}
+.loginBlock {
   height: 100%;
+  display: flex;
+  align-items: center;
 }
 h1, h2 {
   font-weight: normal;
@@ -134,5 +145,8 @@ a {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.ivu-tabs-ink-bar {
+    background-color: #ffcc65;
 }
 </style>

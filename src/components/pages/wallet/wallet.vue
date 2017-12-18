@@ -1,6 +1,6 @@
 <template>
 <div>
-	<button @click="logOut">LOG OUT</button>
+	<!-- <button @click="logOut">LOG OUT</button> -->
 <div class="wrapper">
     <div class="app-wrapper">
       <aside class="wallet">
