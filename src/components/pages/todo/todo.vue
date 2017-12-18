@@ -3,80 +3,72 @@
     <div class="productTable">
       <Row class-name="tableHeader">
         <Col span="24">
-          <h1>ADD YOUR ITEM</h1>                 
-        </Col>
-        <Col span="6">
-          <input 
-              class="input" 
-              type="text"
-              placeholder="Name"
-              v-model="productName"
-            /> 
+          <h1>Hello {{getUserInfo.displayName}}, ADD YOUR SUBJECT</h1>                 
         </Col>
         <Col span="6">
             <input 
-              class="input"
-              type="text"
-              placeholder="Quantity"
-              v-model="productQuantity"
+              v-model="subject"            
+              name="Subject" 
+              type="text" 
+              class="input-nn"
+              placeholder="Subject"
+            />
+        </Col>
+        <Col span="6">
+            <input 
+              name="credits" 
+              type="text" 
+              class="input-nn"
+              placeholder="credits"
+              v-model="credit"
             />
         </Col>
         <Col span="6">
             <input
-              class="input"
-              type="text"
-              placeholder="Price"
-              v-model="productPrice"
+              name="result" 
+              type="text" 
+              class="input-nn"
+              placeholder="result"
+              v-model="result"
             />             
         </Col>
-        <Col span="6">
-            <button  v-if="save" 
-                      @click="saveChanges()"
-                      />SAVE
-            </button>
-            <button @click="addProduct()">ADD</button>
+        <Col span="6" class="submitBtn">
+            <Button 
+              type="warning"
+              v-if="save" 
+              @click="saveChanges()"
+            >SAVE
+            </Button>
+            <Button type="warning" @click="addProduct()">ADD</Button>
         </Col>
       </Row>
+
+          
+     
+      
            
-           <div class="column content">
-             <table class="table is-bordered is-striped is-narrow is-fullwidth">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th> 
-                    <th></th>                   
-                  </tr>
-                </thead>
-                <tfoot>
-                  <tr>
-                    <th><abbr title="Position">Total price</abbr></th>
-                    <th>{{count}}</th>
-                    <th></th>
-                    <th></th>                                        
-                  </tr>
-                </tfoot>
-                <tbody>
-                  <tr v-for="(index, key) in products" :key="key">
-                    <th>{{index.name}}</th>
-                    <td>{{index.quantity}}</td>
-                    <th>{{index.price}}</th> 
-                    <td>
-                      <button class="button" 
-                              @click="editProduct(key)"
-                              >
+           <Row>
+             <Col span="8" v-for="(index, key) in getSubjects" :key="key">
+                <div class="subjectCard">
+                  <Card style="width:250px;margin: 20px;">
+                    <div class="cardHeader" style="text-align:center">
+                      <h2>{{index.name}}</h2>
+                      <h3>credits: {{index.credit}}</h3>
+                      <h3>exam result: {{index.result}}</h3>
+                    </div>
+                      <Button class="toBtn" type="warning" @click="editProduct(key)">
                         <i class="fa fa-pencil"></i>
-                      </button>
-                      <button class="button"
-                              @click="removeProduct(key)"
-                              >
+                      </Button>
+                      <Button class="toBtn" type="error" @click="removeProduct(key)">
                         <i class="fa fa-trash"></i>
-                      </button>
-                    </td> 
-                  </tr>        
-                </tbody>
-              </table>
-           </div>
+                      </Button>
+                  </Card>
+                      
+                </div>   
+             </Col>
+           </Row>
+                      
+          
     </div>
   </Row>
 </template>
@@ -86,73 +78,117 @@ export default {
   name: 'app',
   data () {
     return {
-      productName: '',
-      productQuantity: '',
-      productPrice: '',
+      daysOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      userInfo: {},
+      subject: '',
+      credit: '',
+      result: '',
       products: [],
       save: false,
-      count: 0
+      count: 0,
+      subjectID:'',
     }
   },
+  computed: {
+    getUserInfo() {
+			if (!localStorage.userUid) this.$router.push({ path: '/'})
+			else {
+				const uid = localStorage.userUid
+				const userRef = wilddog.sync().ref().child('users').child(uid)
+				userRef.once('value').then(response => {
+					let data = response.val()
+					this.userInfo = data
+				})
+			}
+      return this.userInfo
+		},
+    getSubjects() {
+      const subjectsRef = wilddog.sync().ref().child('users').child(this.getUserInfo.uid).child('subjects')
+      subjectsRef.once('value').then(response => {
+        let data = response.val()
+        this.products = data
+      })
+      return this.products
+    } 
+  },
   methods:  {
+    gg(e) {
+      console.log(e)
+      this.startingTime = e
+    },
     addProduct() {
+      const parentRef = wilddog.sync().ref().child('users').child(this.getUserInfo.uid).child('subjects')
       let product = {
-                      name: this.productName,
-                      quantity: this.productQuantity,
-                      price: this.productPrice 
-                    }
-                    this.count = this.count + parseInt(product.price)
-      this.products.push(product);
+          name: this.subject,
+          credit: this.credit,
+          result: this.result,
+        }
+        parentRef.push({
+          ...product
+        })
       this.cleanForms()
     },
     editProduct(id) {
+      console.log()
+      this.subjectID = id
+      this.subject = this.products[id].name
+      this.credit = this.products[id].credit
+      this.result = this.products[id].result
       this.save = true
-      this.productName = this.products[id].name,
-      this.productQuantity = this.products[id].quantity,
-      this.productPrice = this.products[id].price
-      this.key = id
-      this.count = this.count - this.productPrice
     },
     saveChanges() {
-          this.products[this.key].name = this.productName
-          this.products[this.key].quantity = this.productQuantity
-          this.products[this.key].price = this.productPrice 
-          this.save = false
-          this.count = this.count + parseInt(this.productPrice)
-          this.cleanForms()   
+      const parentRef = wilddog.sync().ref().child('users').child(this.getUserInfo.uid).child('subjects').child(this.subjectID)
+      parentRef.update({
+        name: this.subject,
+        credit: this.credit,
+        result: this.result 
+      })
+      this.cleanForms()
+      this.save = false      
     },
     removeProduct(key)  {
-      this.count = this.count - parseInt(this.products[key].price)
-      this.products.splice(key)
+      console.log(key)
+      const parentRef = wilddog.sync().ref().child('users').child(this.getUserInfo.uid).child('subjects').child(key).remove()
     },
     cleanForms() {
-        this.productName = ''
-        this.productQuantity = ''
-        this.productPrice = ''
+        this.subject = ''
+        this.credit = ''
+        this.result = ''
     }
   }
 }
 </script>
 
 <style>
+  .subjectCard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .cardHeader h2 {
+    padding: 18px 0px;
+  }
+  .tableHeader h1 {
+    padding: 10px;
+  }
   #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    margin-top: 60px;
   }
   .productTable {
     border: 1px solid #e4e3e3;
     background: #fff;
-    margin: 70px auto;
     border-radius: 2px;
+    margin: 70px;
     overflow: hidden;
-    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);    
+    -webkit-box-shadow: 0px 8px 24px 4px rgba(255,173,40,1);
+    box-shadow: 0px 8px 24px 4px rgba(255,173,40,1);    
   }
   .tableHeader {
-    background-color: #f0db4f;    
+    background-color: #f2f2f2;    
     padding: 40px;
   }
   button:hover {
@@ -205,5 +241,29 @@ export default {
     }
     .content {
       background: #e4e3e3;
+    }
+    .input-nn {
+      height: 28px;
+      line-height: 28px;
+      width: 80%;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      color: #818181; 
+      padding-left: 5px;
+      transition: all ease-in-out .2s;
+      display: inline-block;
+    }
+    .input-nn:focus {
+      cursor: pointer;
+      transition: all ease-in-out .2s;
+      border: 1px solid rgba(255,173,40,1)!important;
+      outline: 0;
+    }
+    .input-nn:hover {
+      cursor: pointer;
+      transition: all ease-in-out .2s;
+      border: 1px solid rgba(255,173,40,0.6);
+      outline: 0;
     }
 </style>
