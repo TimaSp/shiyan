@@ -130,12 +130,14 @@
       submit() {
         this.accountInfo.accType = this.type
         const { uid } = this.user
+        console.warn(uid)
         const walletRef = wilddog.sync().ref().child('users').child(uid).child('wallets').child(this.accountInfo.accName)
         if (this.type === 'card') {
           walletRef.set({
               ...this.accountInfo,
           }).then(() => {
             console.log('Done')
+            this.toggleModal()
           }).catch((error) => {
             console.log('Err', error)
           })

@@ -43,6 +43,15 @@ export default {
 </script>
 
 <style>
+.ivu-tabs-nav .ivu-tabs-tab:hover {
+    color: #facc65;
+}
+.ivu-tabs-nav .ivu-tabs-tab-active {
+  color: #facc65;
+}
+.ivu-tabs-ink-bar {
+  background-color: #facc65;
+}
 .rBtn {
   margin: 10px;
   padding: 10px;
