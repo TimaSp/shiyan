@@ -52,8 +52,7 @@
 								<span v-if="transaction.currency === 'CNY'">
 									元
 								</span>
-                <p class='amount'>
-                  {{transaction.amount}}</p>
+                {{transaction.amount}}
               </div>
               </div>
           </div>
@@ -78,76 +77,9 @@ export default {
 			msg: false,
 			showModal: false,
 			showModalTransaction: false,
-			userInfo: {
-				name: "RT"
-			},
+			userInfo: {},
 			accounts: [],
-			activeAccount: {},
-			cards: [
-				{
-					type: "visa",
-					number: "**** **** **** 2562",
-					expiration: "12/17",
-					transactions: [
-						{
-							name: "Apple iPhone 6, 6g GB",
-							type: "debit",
-							category: "Electronics",
-							ID: "#343223",
-							date: "12 July, 2016",
-							amount: "+650.00"
-						},
-						{
-							name: "Funds Added",
-							type: "credit",
-							category: "Payment",
-							ID: "#343212",
-							date: "11 July, 2016",
-							amount: "-900.00"
-						},
-						{
-							name: "Energy Bill",
-							type: "debit",
-							category: "",
-							ID: "#343566",
-							date: "11 July, 2016",
-							amount: "+84.96"
-						},
-						{
-							name: "Mega Image SRL",
-							type: "debit",
-							category: "Food&Health",
-							ID: "#343565",
-							date: "11 July, 2016",
-							amount: "+112.75"
-						},
-							{
-							name: "ATM DV24",
-							type: "debit",
-							category: "",
-							ID: "#343253",
-							date: "09 July, 2016",
-							amount: "+200.00"
-						},
-						{
-							name: "Lukoil Station",
-							type: "debit",
-							category: "Gas",
-							ID: "#343279",
-							date: "09 July, 2016",
-							amount: "+190.48"
-						},
-						{
-							name: "Funds Added",
-							type: "credit",
-							category: "Payment",
-							ID: "#343212",
-							date: "11 July, 2016",
-							amount: "+390.81"
-						}
-					]
-				}
-			]
+			activeAccount: {}
     }
 	},
 	components: {
@@ -227,6 +159,7 @@ export default {
 	},
 	mounted() {
 		this.getAccounts
+		this.getUserInfo
 	}
 }
 </script>
@@ -316,7 +249,7 @@ h3 {
 	color: #444750;
 }
 .total-balance::before {
-	content: '$';
+	content: '元';
 }
 
 .transactions {
@@ -360,7 +293,7 @@ h3 {
 }
 .transaction-item_amount span {
 	font-weight: 600;
-	font-size: 18px;
+	font-size: 12px;
 	line-height: 45px;
 }
 
@@ -371,7 +304,6 @@ h3 {
 	position: relative;
 	margin: 0px;
 	display: inline-block;
-	text-indent: -15px;
 }
 
 /* Hide + and - */

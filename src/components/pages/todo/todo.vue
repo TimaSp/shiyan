@@ -37,38 +37,31 @@
               type="warning"
               v-if="save" 
               @click="saveChanges()"
+              style="height:32px;"
             >SAVE
             </Button>
             <Button type="warning" @click="addProduct()">ADD</Button>
         </Col>
       </Row>
-
-          
-     
-      
-           
-           <Row>
-             <Col span="8" v-for="(index, key) in getSubjects" :key="key">
-                <div class="subjectCard">
-                  <Card style="width:250px;margin: 20px;">
-                    <div class="cardHeader" style="text-align:center">
-                      <h2>{{index.name}}</h2>
-                      <h3>credits: {{index.credit}}</h3>
-                      <h3>exam result: {{index.result}}</h3>
-                    </div>
-                      <Button class="toBtn" type="warning" @click="editProduct(key)">
-                        <i class="fa fa-pencil"></i>
-                      </Button>
-                      <Button class="toBtn" type="error" @click="removeProduct(key)">
-                        <i class="fa fa-trash"></i>
-                      </Button>
-                  </Card>
-                      
-                </div>   
-             </Col>
-           </Row>
-                      
-          
+      <Row>
+        <Col span="8" v-for="(index, key) in getSubjects" :key="key">
+          <div class="subjectCard">
+            <Card style="width:250px;margin: 20px;">
+              <div class="cardHeader" style="text-align:center">
+                <h2>{{index.name}}</h2>
+                <h3>credits: {{index.credit}}</h3>
+                <h3>exam result: {{index.result}}</h3>
+              </div>
+                <Button class="toBtn" type="warning" @click="editProduct(key)">
+                  <i class="fa fa-pencil"></i>
+                </Button>
+                <Button class="toBtn" type="error" @click="removeProduct(key)">
+                  <i class="fa fa-trash"></i>
+                </Button>
+            </Card>
+          </div>   
+        </Col>
+      </Row>
     </div>
   </Row>
 </template>
